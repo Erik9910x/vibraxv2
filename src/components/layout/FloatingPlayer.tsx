@@ -402,7 +402,7 @@ export default function FloatingPlayer({ onMenuClick }: { onMenuClick?: () => vo
                <div className="text-sm font-semibold text-white truncate hover:underline cursor-pointer" onClick={() => setShowLyrics(true)}>{currentTrack.title}</div>
                <div className="text-xs text-white/50 truncate font-medium">{currentTrack.artist}</div>
              </div>
-             <button onClick={toggleFavorite} className="ml-2 hover:scale-110 transition-transform"><Heart className={cn("w-4 h-4", isFavorite(currentTrack.id) ? "fill-[#fcd34d] text-[#fcd34d] shadow-[0_0_8px_rgba(252,211,77,0.5)]" : "text-white/40")} /></button>
+             <button onClick={() => toggleFavorite(currentTrack.id)} className="ml-2 hover:scale-110 transition-transform"><Heart className={cn("w-4 h-4", isFavorite(currentTrack.id) ? "fill-[#fcd34d] text-[#fcd34d] shadow-[0_0_8px_rgba(252,211,77,0.5)]" : "text-white/40")} /></button>
            </div>
            <div className="flex-1 flex flex-col items-center">
              <div className="flex items-center gap-5 mb-1">
