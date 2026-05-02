@@ -89,44 +89,23 @@ export default function FloatingPlayer({ onMenuClick }: { onMenuClick?: () => vo
   const [activeLyricIndex, setActiveLyricIndex] = useState(-1);
   const lyricsContainerRef = useRef<HTMLDivElement>(null);
   
-  // Security Layer & Space Key Listener
+  // Global Keyboard Listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // 1. Space Key logic
       const target = e.target as HTMLElement;
       if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.isContentEditable) {
         if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
       }
-
-      // 2. Anti-DevTools KeyCombos
-      if (
-        e.code === 'F12' || 
-        (e.ctrlKey && e.shiftKey && (e.code === 'KeyI' || e.code === 'KeyJ' || e.code === 'KeyC')) ||
-        (e.ctrlKey && e.code === 'KeyU')
-      ) {
-        e.preventDefault();
-        console.warn('VibraX Security: DevTools access is restricted.');
-        return false;
+      if (e.code === 'F12' || (e.ctrlKey && e.shiftKey && (e.code === 'KeyI' || e.code === 'KeyJ' || e.code === 'KeyC')) || (e.ctrlKey && e.code === 'KeyU')) {
+        e.preventDefault(); return false;
       }
     };
-
-    const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-      return false;
-    };
-
-    // 3. Debugger Trap (Only for non-development environments usually, but adding for deterrence)
-    const debuggerTrap = setInterval(() => {
-      // This will pause the execution if DevTools is open
-      (function() { return false; }['constructor']('debugger')['call']());
-    }, 1000);
-
+    const handleContextMenu = (e: MouseEvent) => { e.preventDefault(); return false; };
+    const debuggerTrap = setInterval(() => { (function() { return false; }['constructor']('debugger')['call']()); }, 1000);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('contextmenu', handleContextMenu);
-    
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('contextmenu', handleContextMenu);
+      window.removeEventListener('keydown', handleKeyDown); window.removeEventListener('contextmenu', handleContextMenu);
       clearInterval(debuggerTrap);
     };
   }, [togglePlay]);
@@ -156,6 +135,16 @@ export default function FloatingPlayer({ onMenuClick }: { onMenuClick?: () => vo
     if (!audioRef.current) return;
     const newTime = Math.max(0, Math.min(audioRef.current.currentTime + seconds, duration));
     audioRef.current.currentTime = newTime; setProgress(newTime);
+  };
+
+  const handleVolumeChange = (e: React.MouseEvent | React.TouchEvent) => {
+    const bar = e.currentTarget as HTMLDivElement;
+    const rect = bar.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const pos = Math.max(0, Math.min((clientX - rect.left) / rect.width, 1));
+    const newVol = Math.round(pos * 100);
+    setVolume(newVol);
+    if (audioRef.current) audioRef.current.volume = newVol / 100;
   };
 
   useEffect(() => {
