@@ -1,0 +1,20 @@
+# Dependencies
+node_modules
+.next
+out
+build
+
+# Misc
+.DS_Store
+*.pem
+
+# Local env files
+.env*.local
+
+# Vercel
+.vercel
+
+# Project Specific
+vibraX-sidestore
+*.md
+!README.md
