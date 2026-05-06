@@ -66,18 +66,25 @@ export async function GET(request: NextRequest) {
         
         // Final fallback: if no high-precision match, take the first result if title matches at all
         const first = results[0];
-        const dl = first.downloadUrl || first.download_url;
-        let highQual: string | null = null;
-        if (Array.isArray(dl) && dl.length > 0) {
-          highQual = dl[dl.length - 1].link || dl[dl.length - 1].url || dl[dl.length - 1];
-        } else if (typeof first.url === 'string') {
-          highQual = first.url;
-        } else if (typeof first.media_url === 'string') {
-          highQual = first.media_url;
-        }
-        
-        if (highQual) {
-          return { url: highQual, duration: first.duration || first.durationInSeconds, source: 'Saavn-First' };
+        if (first) {
+          const fTitle = normalize(first.name || first.title || '');
+          const fTitleMatch = fTitle.includes(targetTitle) || targetTitle.includes(fTitle);
+          
+          if (fTitleMatch) {
+            const dl = first.downloadUrl || first.download_url;
+            let highQual: string | null = null;
+            if (Array.isArray(dl) && dl.length > 0) {
+              highQual = dl[dl.length - 1].link || dl[dl.length - 1].url || dl[dl.length - 1];
+            } else if (typeof first.url === 'string') {
+              highQual = first.url;
+            } else if (typeof first.media_url === 'string') {
+              highQual = first.media_url;
+            }
+            
+            if (highQual) {
+              return { url: highQual, duration: first.duration || first.durationInSeconds, source: 'Saavn-First' };
+            }
+          }
         }
       }
       return null;
